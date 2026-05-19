@@ -1,0 +1,23 @@
+# S5 — Memory pressure on payment-service
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: payment-memory-stress
+  namespace: observability-lab
+spec:
+  appinfo:
+    appns: observability-lab
+    applabel: app=payment-service
+    appkind: deployment
+  chaosServiceAccount: litmus-admin
+  experiments:
+    - name: pod-memory-hog
+      spec:
+        components:
+          env:
+            - name: MEMORY_CONSUMPTION
+              value: "256"
+            - name: MEMORY_PERCENTAGE
+              value: "50"
+            - name: TOTAL_CHAOS_DURATION
+              value: "300"

@@ -1,0 +1,90 @@
+# Observability lab — matches research paper testbed (User, Order, Payment + gateway)
+# Usage: docker compose up --build
+# Gateway: http://localhost:8080  |  Grafana: http://localhost:3000  |  Jaeger: http://localhost:16686
+
+services:
+  api-gateway:
+    build: { context: ., args: { SERVICE: gateway } }
+    ports: ["8080:8080"]
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector:4318
+      USER_SERVICE_URL: http://user-service:8081
+      ORDER_SERVICE_URL: http://order-service:8082
+    depends_on: [user-service, order-service, otel-collector]
+
+  user-service:
+    build: { context: ., args: { SERVICE: user } }
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector:4318
+      PORT: "8081"
+    depends_on: [otel-collector]
+
+  order-service:
+    build: { context: ., args: { SERVICE: order } }
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector:4318
+      PAYMENT_SERVICE_URL: http://payment-service:8083
+      PORT: "8082"
+      # Scenario S3: network delay on order → payment (ms)
+      FAULT_NETWORK_DELAY_MS: ${FAULT_NETWORK_DELAY_MS:-0}
+    depends_on: [payment-service, otel-collector]
+
+  payment-service:
+    build: { context: ., args: { SERVICE: payment } }
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector:4318
+      PORT: "8083"
+      # Scenario S2: set FAULT_DELAY_MS=300 for payment delay injection
+      FAULT_DELAY_MS: ${FAULT_DELAY_MS:-0}
+    depends_on: [otel-collector]
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.92.0
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes: ["./configs/otel-collector/config.yaml:/etc/otel-collector-config.yaml"]
+    ports: ["4317:4317", "4318:4318", "8889:8889"]
+    depends_on: [jaeger, prometheus]
+
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    volumes:
+      - ./configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./configs/prometheus/alerts.yml:/etc/prometheus/alerts.yml
+    ports: ["9090:9090"]
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-lifecycle
+
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    volumes: ["./configs/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml"]
+    ports: ["9093:9093"]
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.52
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports: ["16686:16686", "14268:14268"]
+
+  grafana:
+    image: grafana/grafana:10.2.2
+    ports: ["3000:3000"]
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./configs/grafana/provisioning:/etc/grafana/provisioning
+    depends_on: [prometheus, jaeger]
+
+  # Optional: enable with docker compose --profile datadog up
+  datadog-agent:
+    image: gcr.io/datadoghq/agent:7.50.0
+    profiles: [datadog]
+    environment:
+      DD_API_KEY: ${DD_API_KEY:-}
+      DD_SITE: datadoghq.com
+      DD_APM_ENABLED: "true"
+      DD_LOGS_ENABLED: "true"
+      DD_OTLP_CONFIG_RECEIVER_PROTOCOLS_HTTP_ENDPOINT: 0.0.0.0:4318
+    volumes: [/var/run/docker.sock:/var/run/docker.sock:ro]
+    ports: ["8126:8126"]

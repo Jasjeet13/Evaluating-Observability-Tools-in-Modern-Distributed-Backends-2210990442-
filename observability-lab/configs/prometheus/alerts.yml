@@ -1,0 +1,10 @@
+groups:
+  - name: observability-lab
+    rules:
+      - alert: HighLatencyP95
+        expr: histogram_quantile(0.95, sum(rate(http_server_duration_milliseconds_bucket[2m])) by (le)) > 130
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Elevated p95 latency on HTTP servers"

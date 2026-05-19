@@ -1,0 +1,41 @@
+run_id,scenario,path,recovery_condition,seed,mttd_s,mttr_min,localized_correct,alert_fp_pre_fault,notes
+R001,S2,A1,A1_only,42,7.1,22.4,1,0,
+R002,S2,A2,A2_only,43,3.4,18.6,1,0,
+R003,S2,baseline,baseline_logs,44,NA,47.5,0,0,no correlated traces
+R004,S2,integrated_runbook,integrated,45,8.0,12.1,1,0,matches Section V-E exemplar
+R005,S2,A1,A1_only,46,7.4,21.9,1,0,
+R006,S2,A2,A2_only,47,2.9,17.2,1,0,
+R007,S2,baseline,baseline_logs,48,NA,43.8,0,0,
+R008,S2,integrated_runbook,integrated,49,7.6,11.5,1,0,
+R009,S2,A1,A1_only,50,6.8,23.0,1,0,Path A1 run 4: alert at 7.2s
+R010,S2,integrated_runbook,integrated,51,8.2,12.8,1,0,
+R011,S3,A1,A1_only,52,8.8,23.1,1,0,
+R012,S3,A2,A2_only,53,5.1,19.4,0,1,excluded from A2 MTTD mean (Table VII)
+R013,S3,baseline,baseline_logs,54,NA,46.1,0,0,
+R014,S3,integrated_runbook,integrated,55,9.1,13.4,1,0,
+R015,S3,A1,A1_only,56,8.2,22.0,1,0,
+R016,S3,B,B_grafana,57,10.1,20.5,1,0,
+R017,S4,A1,A1_only,58,9.2,21.8,1,0,
+R018,S4,A2,A2_only,59,4.8,19.0,1,0,
+R019,S4,C,C_jaeger,60,10.5,NA,1,0,RCA timing only
+R020,S4,integrated_runbook,integrated,61,9.0,12.6,1,0,
+R021,S4,baseline,baseline_logs,62,NA,44.9,0,0,
+R022,S4,A1,A1_only,63,8.5,22.6,1,0,
+R023,S2,C,C_jaeger,64,10.4,NA,1,0,S2 localization 92% pool
+R024,S3,C,C_jaeger,65,9.7,NA,1,0,
+R025,S0,A1,A1_only,66,NA,NA,1,0,nominal control
+R026,S1,A1,A1_only,67,NA,NA,1,2,high load stress
+R027,S2,B,B_grafana,68,9.5,20.1,1,0,
+R028,S3,A2,A2_only,69,5.4,18.9,1,0,
+R029,S4,A2,A2_only,70,4.2,18.2,1,0,
+R030,S5,A1,A1_only,71,9.8,24.0,1,0,memory pressure
+R031,S2,A2,A2_only,72,3.1,19.1,1,0,mean MTTD S2 A2 = 3.1s
+R032,S2,A1,A1_only,73,7.2,22.1,1,0,mean MTTD S2 A1 = 7.2s
+R033,S3,A1,A1_only,74,8.5,22.8,1,0,
+R034,S4,A1,A1_only,75,8.9,21.5,1,0,
+R035,S2,integrated_runbook,integrated,76,7.9,10.9,1,0,CI lower bound integrated MTTR
+R036,S2,baseline,baseline_logs,77,NA,48.1,0,0,CI upper bound baseline MTTR
+R037,S3,integrated_runbook,integrated,78,8.4,13.1,1,0,
+R038,S4,integrated_runbook,integrated,79,8.7,11.8,1,0,
+R039,S5,integrated_runbook,integrated,80,9.2,13.0,1,0,
+R040,S2,A1,A1_only,81,7.0,22.5,1,0,

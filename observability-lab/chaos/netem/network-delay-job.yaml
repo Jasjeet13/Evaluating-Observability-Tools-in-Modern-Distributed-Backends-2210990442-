@@ -1,0 +1,27 @@
+# S3 — Network delay (+20 ms RTT example) via tc netem on order-service pod (Kubernetes)
+# Apply: kubectl apply -f chaos/netem/network-delay-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: netem-delay-order
+  namespace: observability-lab
+spec:
+  template:
+    spec:
+      hostNetwork: true
+      containers:
+        - name: netem
+          image: alpine:3.19
+          securityContext:
+            privileged: true
+          command:
+            - /bin/sh
+            - -c
+            - |
+              apk add --no-cache iproute2
+              # Adjust interface and delay for your cluster CNI
+              tc qdisc add dev eth0 root netem delay 20ms
+              sleep 900
+              tc qdisc del dev eth0 root netem || true
+      restartPolicy: Never
+  backoffLimit: 1
